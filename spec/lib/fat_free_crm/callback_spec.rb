@@ -41,9 +41,6 @@ module CallbackSpecHelper
       "REPLACED"
     end
 
-    def test_legacy(view, context={})
-      "LEGACY"
-    end
   end
 
   def test_hook(position)
@@ -57,97 +54,50 @@ end
 #------------------------------------------------------------------------------
 module LegacyCallbackSpecHelper
   class LegacyTestCallback < FatFreeCRM::Callback::Base
-
-    def test_before(view, context = {})
-      "before"
-    end
-
-    def test_after(view, context = {})
-      "after"
-    end
-
-    def test_replace(view, context = {})
-      "replace"
-    end
-
-    def test_remove(view, context = {})
-      "remove"
-    end
-
-    def test_before_and_after(view, context = {})
-      "before-and-after"
-    end
-
-    def test_before_and_after_with_replace(view, context = {})
-      "before-and-after-replaced"
-    end
-
-    def test_legacy(view, context = {})
+    def test_legacy_after(view, context = {})
       "legacy"
     end
   end
 
   def test_legacy_hook(position)
     Haml::Engine.new(%Q^
-= hook(:test_#{position}, ActionView::Base.new)^).render.gsub("\n",'')
+= hook(:test_legacy_#{position}, ActionView::Base.new)^).render.gsub("\n",'')
   end
 end
 
 #------------------------------------------------------------------------------
 describe FatFreeCRM::Callback do
-  include CallbackSpecHelper
-  include LegacyCallbackSpecHelper
+  describe "View Hooks" do
+    include CallbackSpecHelper
+    include LegacyCallbackSpecHelper
 
-  it "should insert content before the block" do
-    test_hook(:before).should == "BEFORE-BLOCK"
-  end
+    it "should insert content before the block" do
+      test_hook(:before).should == "BEFORE-BLOCK"
+    end
 
-  it "should insert content after the block" do
-    test_hook(:after).should == "BLOCK-AFTER"
-  end
+    it "should insert content after the block" do
+      test_hook(:after).should == "BLOCK-AFTER"
+    end
 
-  it "should replace the content of the block" do
-    test_hook(:replace).should == "REPLACE"
-  end
+    it "should replace the content of the block" do
+      test_hook(:replace).should == "REPLACE"
+    end
 
-  it "should remove the block" do
-    test_hook(:remove).should == ""
-  end
+    it "should remove the block" do
+      test_hook(:remove).should == ""
+    end
 
-  it "should be able to insert content before and after the block" do
-    test_hook(:before_and_after).should == "BEFORE-BLOCK-AFTER"
-  end
+    it "should be able to insert content before and after the block" do
+      test_hook(:before_and_after).should == "BEFORE-BLOCK-AFTER"
+    end
 
-  it "should be able to insert content before and after a replaced block" do
-    test_hook(:before_and_after_with_replace).should == "BEFORE-REPLACED-AFTER"
-  end
+    it "should be able to insert content before and after a replaced block" do
+      test_hook(:before_and_after_with_replace).should == "BEFORE-REPLACED-AFTER"
+    end
 
-  it "should still work for legacy hooks" do
-    Haml::Engine.new("= hook(:test_legacy, ActionView::Base.new)").render.
-      gsub("\n",'').should == "LEGACYlegacy"
-  end
-
-  it "should render before" do
-    test_legacy_hook(:before).should == "BEFORE-before"
-  end
-
-  it "should render after" do
-    test_legacy_hook(:after).should == "-AFTERafter"
-  end
-
-  it "should replace the content of the block" do
-    test_legacy_hook(:replace).should == "REPLACEreplace"
-  end
-
-  it "should remove the block" do
-    test_legacy_hook(:remove).should == "remove"
-  end
-
-  it "should be able to insert content before and after the block" do
-    test_legacy_hook(:before_and_after).should == "BEFORE--AFTERbefore-and-after"
-  end
-
-  it "should be able to insert content before and after a replaced block" do
-    test_legacy_hook(:before_and_after_with_replace).should == "BEFORE-REPLACED-AFTERbefore-and-after-replaced"
+    it "should render legacy hooks" do
+      test_legacy_hook(:after).should == "legacy"
+    end
   end
 end
+
